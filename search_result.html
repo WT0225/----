@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <!-- JQuery -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <!-- JQuery  -->
+        <link rel="stylesheet" href="./search_result.css">
+    </head>
+
+    <body>
+        
+        <h1 id="h1">Search Result </h1>
+        <p><input type="text" id="from"> <button id="get">Refresh</button></p>
+        <!-- 住所情報をとってきて地図を表示する -->
+        <div id="main" class="main">
+            <div id="myMap" class="myMap" style="height:700px;"></div>
+        </div>
+        <table id="shopinfo">
+            <th id="shopname_log"></th>
+            <th class='address_log' id='address_log'></th>
+            <th class='servicemenu_log' id='servicemenu_log'></th>"
+        </table>
+        
+        <!-- 検索値を受け取り -->
+        <script>
+        let query_search = location.search;
+        let value_search = query_search.split("=");
+        let search_place = decodeURIComponent(value_search[1]);
+        document.getElementById("from").value= search_place;
+        </script>
+
+        <!-- firebase -->
+        <script type="module">
+            // Import the functions you need from the SDKs you need
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+            import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
+            // TODO: Add SDKs for Firebase products that you want to use
+            // https://firebase.google.com/docs/web/setup#available-libraries
+            import {getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved, onValue } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js'
+
+            // Your web app's Firebase configuration
+            // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+            const firebaseConfig = {
+                apiKey: "",
+                authDomain: "on-site-repair-app.firebaseapp.com",
+                databaseURL: "https://on-site-repair-app-default-rtdb.firebaseio.com",
+                projectId: "on-site-repair-app",
+                storageBucket: "on-site-repair-app.appspot.com",
+                messagingSenderId: "651600157960",
+                appId: "1:651600157960:web:ede79ba8cb33ba6be460bd",
+                measurementId: "G-HLG30FBC17"
+            };
+
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+
+            const db = getDatabase(app);
+            const dbRef = ref(db, "ServiceShop");
+            onChildAdded(dbRef, function(data){
+                const info = data.val();
+                // let h = "<p id='shopname_log'>";
+                // h += info.shopname;
+                // h += "</p><p class='address_log' id='address_log'>";
+                // h += info.address;
+                // h += "</p><p class='servicemenu_log' id='servicemenu_log'>";
+                // h += info.servicemenu;
+                // h += "</p>";
+                // $("#shopinfo").append(h);
+
+
+            })
+
+        </script>
+        
+
+        <!-- BingMapAPI -->
+        <script src="https://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=AiwkIgR9Zk7lptVtL8VpD9LfWh-QjKI8WnpGLef9MSmEHNvAL7ytUU7dEd-fz8ok" async defer></script>
+        <script>
+            let map;             //MapObject用
+        let searchManager;   //SearchObject用
+        function GetMap() {
+            //Map生成
+            map = new Microsoft.Maps.Map('#myMap', {
+                zoom: 15,
+                mapTypeId: Microsoft.Maps.MapTypeId.load
+            });
+            //検索モジュール指定
+            Microsoft.Maps.loadModule('Microsoft.Maps.Search', function () {
+                //searchManagerインスタンス化（Geocode,ReverseGeocodeが使用可能になる）
+                searchManager = new Microsoft.Maps.Search.SearchManager(map);
+                //Geocode：住所から検索
+                geocodeQuery(document.getElementById("from").value);
+            });
+
+            // infobox設定
+
+            let location1 = new Microsoft.Maps.Location(35.41,139.41);
+            let infobox1 = new Microsoft.Maps.Infobox(location1, { 
+                    title : "Demo motors",
+                    description : "demo"
+                });
+            infobox1.setMap(map);  
+
+            let location2 = new Microsoft.Maps.Location(35.73,139.45);
+            let infobox2 = new Microsoft.Maps.Infobox(location2, { 
+                    title : "Gs motors",
+                    description : "demo"
+                });
+
+            infobox2.setMap(map); 
+
+            let location3 = new Microsoft.Maps.Location(35.38,139.97);
+            let infobox3 = new Microsoft.Maps.Infobox(location3, { 
+                    title : "Toida motors",
+                    description : "demo"
+                });
+            infobox3.setMap(map);       
+            
+            let location4 = new Microsoft.Maps.Location(35.78,139.97);
+            let infobox4 = new Microsoft.Maps.Infobox(location4, { 
+                    title : "MC motors",
+                    description : "demo"
+                });
+            infobox4.setMap(map); 
+            
+        }
+
+        /**
+         * 検索ボタン[Click:Event]
+         */
+        document.getElementById("get").onclick = function(){
+            //4.Geocode:住所から検索
+            geocodeQuery(document.getElementById("from").value);
+        };
+
+        /**
+         * 住所から緯度経度を取得
+         * @param query [住所文字列]
+         */
+        function geocodeQuery(query) {
+            if(searchManager) {
+                //住所から緯度経度を検索
+                searchManager.geocode({
+                    where: query,       //検索文字列
+                    callback: function (r) { //検索結果を"( r )" の変数で取得
+                        //最初の検索取得結果をMAPに表示
+                        if (r && r.results && r.results.length > 0) {
+                            //Pushpinを立てる
+                            const pin = new Microsoft.Maps.Pushpin(r.results[0].location);
+                            map.entities.push(pin);
+                            //map表示位置を再設定
+                            map.setView({ bounds: r.results[0].bestView});
+                            //取得た緯度経度をh1要素にJSON文字列にして表示
+                            
+                        }
+                    },
+                    errorCallback: function (e) {
+                        alert("見つかりません");
+                    }
+                });
+            }
+        }
+        </script>
+
+       
+    </body>
+</html>

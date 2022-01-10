@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./register.css">
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- JQuery  -->
+</head>
+<body>
+    <header>
+        <h1>New Service Shop Registration</h1>
+    </header>
+
+    <section class="info_input">
+        <dl>
+            <dt>Service shop name</dt>
+            <dd><input type="text" id="shopname"></dd>
+
+            <dt>Address</dt>
+            <dd><input type="text" id="address"></dd>
+
+            <dt>Working time</dt>
+            <dd>
+                <input type="text" id="workingtime">
+            </dd>
+
+            <dt>Working day</dt>
+            <dd>    
+                <input type="checkbox" name="" id="workingday">Monday
+                <input type="checkbox" name="" id="workingday">Tuesday
+                <input type="checkbox" name="" id="workingday">Wednesday
+                <input type="checkbox" name="" id="workingday">Thursday
+                <input type="checkbox" name="" id="workingday">Friday
+                <input type="checkbox" name="" id="workingday">Saturday
+                <input type="checkbox" name="" id="workingday">Sunday
+            </dd>
+
+            <dt>Service Menu</dt>
+            <dd>  
+                <input type="checkbox" name="" id="servicemenu">Battery
+                <input type="checkbox" name="" id="servicemenu">Engine
+                <input type="checkbox" name="" id="servicemenu">Air-conditioner
+                <input type="checkbox" name="" id="servicemenu">Car wahshing
+                <input type="checkbox" name="" id="servicemenu">Drive recoder
+            </dd>  
+        </dl>
+
+        <button id="apply">Apply</button>
+        <div id="success"></div>
+    </section>
+    
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+        import {getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js'
+       
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "",
+            authDomain: "on-site-repair-app.firebaseapp.com",
+            databaseURL: "https://on-site-repair-app-default-rtdb.firebaseio.com",
+            projectId: "on-site-repair-app",
+            storageBucket: "on-site-repair-app.appspot.com",
+            messagingSenderId: "651600157960",
+            appId: "1:651600157960:web:ede79ba8cb33ba6be460bd",
+            measurementId: "G-HLG30FBC17"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        const db = getDatabase(app);
+        const dbRef = ref(db, "ServiceShop");
+
+        
+
+        // 申請処理
+        $("#apply").on("click", function(){
+            const info = {
+                shopname : $("#shopname").val(),
+                address : $("#address").val(),
+                workingtime : $("#workingtime").val(),
+                workingday : $("#workingday").val(),
+                servicemenu : $("#servicemenu").val()
+            }
+            const newServiceShop = push(dbRef);
+            set(newServiceShop, info);
+            $("#success").html("Your application has successfully been sent. Plase wait a moment.")
+
+
+            
+        })
+
+        onChildAdded(dbRef, function(data){
+            const info = data.val();
+            console.log(info);
+
+        })
+
+        // マップに表示させる：住所、名前を受け渡す
+
+
+
+
+
+      </script>
+
+
+
+
+
+</body>
+</html>
